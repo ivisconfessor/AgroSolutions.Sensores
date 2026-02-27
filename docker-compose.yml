@@ -12,3 +12,43 @@ services:
     # environment:
     #   RABBITMQ_DEFAULT_USER: guest
     #   RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - agrosolutions-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: agrosolutions-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - agrosolutions-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: agrosolutions-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - agrosolutions-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  agrosolutions-network:
+    driver: bridge
