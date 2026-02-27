@@ -17,6 +17,16 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddSensoresInfra(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -30,6 +40,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 // Ingestão de leitura de sensores (simulada)
 app.MapPost("/leituras", async (InserirLeituraRequest request, ILeituraSensorRepository repo, IRabbitMqPublicador rabbit, CancellationToken ct) =>
